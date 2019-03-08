@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <item name="positive_button" type="id"/>
+    <item name="dialog__title" type="id"/>
+    <item name="neutral_button" type="id"/>
+    <item name="nega_button" type="id"/>
+    <item name="dialog_item_content" type="id"/>
+    <item name="dialog_checkbox" type="id"/>
+    <item name="dialog_recyclerview" type="id"/>
+    <item name="dialog_icon" type="id"/>
+    <item name="dialog_item_icon" type="id"/>
+    <item name="negative_button" type="id"/>
+    <item name="dialog__message" type="id"/>
+
+</resources>

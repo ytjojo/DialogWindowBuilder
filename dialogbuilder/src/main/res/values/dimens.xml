@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="dialog_content_horizontal_margin">32dp</dimen>
+    <dimen name="dialog_content_vertical_margin">52dp</dimen>
+
+    <!-- Default radius for CardView corners. -->
+    <dimen name="dialog_default_radius">5dp</dimen>
+    <!-- Elevation value to use for CardViews. Pre-L, it is equal to shadow size. -->
+    <dimen name="dialog_default_elevation">5dp</dimen>
+
+    <dimen name="dialog_max_elevation">16dp</dimen>
+    <!-- Inset shadow for RoundRectDrawableWithShadow. It is used to avoid gaps between the card
+     and the shadow. -->
+    <dimen name="dialog_compat_inset_shadow">1dp</dimen>
+</resources>
