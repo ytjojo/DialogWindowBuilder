@@ -15,6 +15,7 @@ import android.os.Build;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
@@ -43,11 +44,11 @@ public class ScreenLayout extends FrameLayout {
     private RoundRectDrawableWithShadow shadowDrawable;
 
     public ScreenLayout(@NonNull Context context) {
-        this(context,null);
+        this(context, null);
     }
 
     public ScreenLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
-        this(context, attrs,0);
+        this(context, attrs, 0);
     }
 
     public ScreenLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
@@ -62,15 +63,16 @@ public class ScreenLayout extends FrameLayout {
     }
 
 
-    private void init(){
+    private void init() {
 
         backgroundColor = ColorStateList.valueOf(getResources().getColor(R.color.dialog_light_background));
         radius = getResources().getDimensionPixelOffset(R.dimen.dialog_default_radius);
         elevation = getResources().getDimensionPixelOffset(R.dimen.dialog_default_elevation);
         maxElevation = getResources().getDimensionPixelOffset(R.dimen.dialog_max_elevation);
-        shadowDrawable = RoundRectDrawableWithShadow.initialize(getContext(),backgroundColor,radius,elevation,maxElevation);
+        shadowDrawable = RoundRectDrawableWithShadow.initialize(getContext(), backgroundColor, radius, elevation, maxElevation);
         shadowPadding = new Rect();
         ensureBackgroudView();
+        setBackground(null);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             this.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
@@ -78,62 +80,64 @@ public class ScreenLayout extends FrameLayout {
     }
 
 
-
     @Override
     protected void dispatchDraw(Canvas canvas) {
         super.dispatchDraw(canvas);
     }
+
     private Path mPath = new Path();
     private RectF mClipRect = new RectF();
     private Matrix matrix = new Matrix();
+
     @Override
     protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
 
-        if(child == mContentView){
+        if (child == mContentView) {
 
-            try{
+            try {
                 canvas.save();
-                clipChild(canvas,child);
+                clipChild(canvas, child);
                 return super.drawChild(canvas, child, drawingTime);
 //                return true;
-            }finally {
+            } finally {
                 canvas.restore();
             }
-        }else {
+        } else {
             return super.drawChild(canvas, child, drawingTime);
         }
 
 
     }
-    private void clipChild(Canvas canvas,View child){
-        if(radius <= 0){
+
+    private void clipChild(Canvas canvas, View child) {
+        if (radius <= 0) {
             return;
         }
         canvas.save();
 
-        float cx = child.getLeft()+child.getPivotX();
+        float cx = child.getLeft() + child.getPivotX();
         float cy = child.getTop() + child.getPivotY();
         matrix.reset();
 //        canvas.scale(child.getScaleX(),child.getScaleY(),cx,cy);
-        matrix.postScale(child.getScaleX(),child.getScaleY(),cx,cy);
-        matrix.preTranslate(child.getTranslationX(),child.getTranslationY());
+        matrix.postScale(child.getScaleX(), child.getScaleY(), cx, cy);
+        matrix.preTranslate(child.getTranslationX(), child.getTranslationY());
         canvas.setMatrix(matrix);
-        canvas.translate(child.getLeft()-shadowPadding.left,child.getTop() - shadowPadding.top);
+        canvas.translate(child.getLeft() - shadowPadding.left, child.getTop() - shadowPadding.top);
 
-        int alpha = (int) (child.getAlpha()*255);
-        if(shadowDrawable.getAlpha() != alpha){
+        int alpha = (int) (child.getAlpha() * 255);
+        if (shadowDrawable.getAlpha() != alpha) {
             shadowDrawable.setAlpha(alpha);
         }
         shadowDrawable.draw(canvas);
         canvas.restore();
 //        mClipRect.set(child.getLeft(), child.getTop(), child.getRight(), child.getBottom());
 
-        float left = child.getPivotX()+child.getLeft() +child.getScaleX() * (-child.getPivotX());
-        float top = child.getTop() +child.getPivotY() + child.getScaleY() *( -child.getPivotY() );
+        float left = child.getPivotX() + child.getLeft() + child.getScaleX() * (-child.getPivotX());
+        float top = child.getTop() + child.getPivotY() + child.getScaleY() * (-child.getPivotY());
 
         mClipRect.set(left,
-                top, left + child.getMeasuredWidth()*child.getScaleX(),top+child.getMeasuredHeight()*child.getScaleY());
-        mClipRect.offset(child.getTranslationX(),child.getTranslationY());
+                top, left + child.getMeasuredWidth() * child.getScaleX(), top + child.getMeasuredHeight() * child.getScaleY());
+        mClipRect.offset(child.getTranslationX(), child.getTranslationY());
         mPath.reset();
         mPath.addRoundRect(mClipRect, radius * child.getScaleX(), radius * child.getScaleX(), Path.Direction.CW);
         canvas.clipPath(mPath, Region.Op.REPLACE);
@@ -143,46 +147,107 @@ public class ScreenLayout extends FrameLayout {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 
-        if(mContentView != null){
-           LayoutParams params = (LayoutParams) mContentView.getLayoutParams();
-           params.leftMargin = mLeftMargin;
-           params.rightMargin = mRightMargin;
+        if (mContentView != null) {
+            LayoutParams params = (LayoutParams) mContentView.getLayoutParams();
+            params.leftMargin = mLeftMargin;
+            params.rightMargin = mRightMargin;
         }
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        int contentViewHeight= mContentView.getMeasuredHeight();
-        mParentHeight= this.getMeasuredHeight();
-        if(mContentView !=null){
-            if(contentViewHeight + mMinTopMargin + mMinBottomMargin > mParentHeight){
-                contentViewHeight = mParentHeight -mMinBottomMargin -mMinTopMargin;
-                if(contentViewHeight != mContentView.getMeasuredHeight()){
-                    mContentView.measure(MeasureSpec.makeMeasureSpec(mContentView.getMeasuredWidth(),MeasureSpec.EXACTLY),
-                            MeasureSpec.makeMeasureSpec(contentViewHeight,MeasureSpec.EXACTLY));
+        int contentViewHeight = mContentView.getMeasuredHeight();
+        mParentHeight = this.getMeasuredHeight();
+        if (mContentView != null) {
+            if (contentViewHeight + mMinTopMargin + mMinBottomMargin > mParentHeight) {
+                contentViewHeight = mParentHeight - mMinBottomMargin - mMinTopMargin;
+                if (contentViewHeight != mContentView.getMeasuredHeight()) {
+                    mContentView.measure(MeasureSpec.makeMeasureSpec(mContentView.getMeasuredWidth(), MeasureSpec.EXACTLY),
+                            MeasureSpec.makeMeasureSpec(contentViewHeight, MeasureSpec.EXACTLY));
 
                 }
             }
 
         }
-        int measureHeight =  mContentView.getMeasuredHeight();
-        if(measureHeight != 0){
+        int measureHeight = mContentView.getMeasuredHeight();
+        if (measureHeight != 0) {
 
             mContentViewHeight = mContentView.getMeasuredHeight();
         }
     }
 
     private int mContentViewHeight;
+
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        if(mContentView !=null && mLayoutVerticalBias >=0 && mLayoutVerticalBias<=1){
-            int contentViewTop = (int) ((mLayoutVerticalBias )*(mParentHeight - mContentView.getMeasuredHeight()));
-            mContentView.layout(mContentView.getLeft(),contentViewTop,mContentView.getLeft()+mContentView.getMeasuredWidth()
-            ,contentViewTop + mContentView.getMeasuredHeight());
+        if (mContentView != null && mLayoutVerticalBias >= 0 && mLayoutVerticalBias <= 1) {
+            int contentViewTop = (int) ((mLayoutVerticalBias) * (mParentHeight - mContentView.getMeasuredHeight()));
+            mContentView.layout(mContentView.getLeft(), contentViewTop, mContentView.getLeft() + mContentView.getMeasuredWidth()
+                    , contentViewTop + mContentView.getMeasuredHeight());
+
+        } else if (mContentAnchorView != null && mContentView != null) {
+            if (auchorViewlocation == null) {
+                auchorViewlocation = new int[2];
+                mContentAnchorView.getLocationOnScreen(auchorViewlocation);
+            }
+            int[] parentLocation = new int[2];
+            getLocationOnScreen(parentLocation);
+            int localX = auchorViewlocation[0] - parentLocation[0] + mOffsetAnchorX;
+            int localY = auchorViewlocation[1] - parentLocation[1] + mOffsetAnchorY;
+            int childLeft = 0;
+            int childTop = 0;
+            int childWidth = mContentView.getMeasuredWidth();
+            int childHeight = mContentView.getMeasuredHeight();
+            if ((mHorizontalAnchorFlag & WindowBuilder.RELATIVE_LEFT_TO_LEFTOF) !=0
+                    && (mHorizontalAnchorFlag & WindowBuilder.RELATIVE_RIGHT_TO_LEFTOF) !=0) {
+                childLeft = localX - childWidth / 2;
+            } else if ((mHorizontalAnchorFlag & WindowBuilder.RELATIVE_RIGHT_TO_RIGHTOF) !=0
+                    && (mHorizontalAnchorFlag & WindowBuilder.RELATIVE_LEFT_TO_RIGHTOF) !=0) {
+                childLeft = localX + mContentAnchorView.getMeasuredWidth() - childWidth / 2;
+            } else if ((mHorizontalAnchorFlag & WindowBuilder.RELATIVE_LEFT_TO_LEFTOF) !=0
+                    && (mHorizontalAnchorFlag & WindowBuilder.RELATIVE_RIGHT_TO_RIGHTOF) !=0) {
+                childLeft = localX + (mContentAnchorView.getMeasuredWidth() - childWidth) / 2;
+            } else if ((mHorizontalAnchorFlag & WindowBuilder.RELATIVE_LEFT_TO_LEFTOF) !=0) {
+                childLeft = localX;
+            } else if ((mHorizontalAnchorFlag & WindowBuilder.RELATIVE_RIGHT_TO_LEFTOF) !=0) {
+                childLeft = localX - childWidth;
+            } else if ((mHorizontalAnchorFlag & WindowBuilder.RELATIVE_RIGHT_TO_RIGHTOF) !=0) {
+                childLeft = localX + mContentAnchorView.getMeasuredWidth() - childWidth;
+
+            } else if ((mHorizontalAnchorFlag & WindowBuilder.RELATIVE_LEFT_TO_RIGHTOF) !=0) {
+                childLeft = localX + mContentAnchorView.getMeasuredWidth();
+
+            } else {
+                childLeft = localX;
+            }
+
+            if ((mVerticalAnchorFlag & WindowBuilder.RELATIVE_TOP_TO_TOPOF) !=0
+                    && (mVerticalAnchorFlag & WindowBuilder.RELATIVE_BOTTOM_TO_TOPOF) !=0) {
+                childTop = localY - childHeight / 2;
+            } else if ((mVerticalAnchorFlag & WindowBuilder.RELATIVE_BOTTOM_TO_BOTTOMOF) !=0
+                    && (mVerticalAnchorFlag & WindowBuilder.RELATIVE_TOP_TO_BOTTOMOF) !=0) {
+                childTop = localY + mContentAnchorView.getMeasuredHeight() - childHeight / 2;
+            } else if ((mVerticalAnchorFlag & WindowBuilder.RELATIVE_TOP_TO_TOPOF) !=0
+                    && (mVerticalAnchorFlag & WindowBuilder.RELATIVE_BOTTOM_TO_BOTTOMOF) !=0) {
+                childTop = localY + (mContentAnchorView.getMeasuredHeight() - childHeight) / 2;
+            } else if ((mVerticalAnchorFlag & WindowBuilder.RELATIVE_TOP_TO_TOPOF) !=0) {
+                childTop = localY;
+            } else if ((mVerticalAnchorFlag & WindowBuilder.RELATIVE_BOTTOM_TO_TOPOF) !=0) {
+                childTop = localY - childHeight;
+            } else if ((mVerticalAnchorFlag & WindowBuilder.RELATIVE_BOTTOM_TO_BOTTOMOF) !=0) {
+                childTop = localY + mContentAnchorView.getMeasuredHeight() - childHeight;
+
+            } else if ((mVerticalAnchorFlag & WindowBuilder.RELATIVE_TOP_TO_BOTTOMOF) !=0) {
+                childTop = localY + mContentAnchorView.getMeasuredHeight();
+
+            } else {
+                childTop = localY;
+            }
+            mContentView.layout(childLeft, childTop, childLeft + childWidth, childTop + childHeight);
 
         }
 
-        if(shadowDrawable != null){
+        if (shadowDrawable != null) {
             shadowDrawable.getMaxShadowAndCornerPadding(shadowPadding);
-            shadowDrawable.setBounds(0,0,
+            shadowDrawable.setBounds(0, 0,
                     mContentView.getMeasuredWidth() + shadowPadding.left + shadowPadding.right,
                     mContentView.getMeasuredHeight() + shadowPadding.top + shadowPadding.bottom);
         }
@@ -262,29 +327,54 @@ public class ScreenLayout extends FrameLayout {
         this.mParentHeight = mParentHeight;
     }
 
-    public int getContentViewHeight(){
+    public int getContentViewHeight() {
         return mContentViewHeight;
     }
-    public void setWindowBackgroudColor(@ColorInt int color){
+
+    public void setWindowBackgroudColor(@ColorInt int color) {
 
         ensureBackgroudView();
-        this.mBackgroundColor= color;
+        this.mBackgroundColor = color;
         mBackgroundView.setImageDrawable(new ColorDrawable(color));
 
     }
 
-    public void setWindowBackgroud(Drawable drawable){
+    public void setWindowBackgroud(Drawable drawable) {
         ensureBackgroudView();
         mBackgroundView.setImageDrawable(drawable);
     }
-    private void ensureBackgroudView(){
-        if(mBackgroundView == null){
+
+    private void ensureBackgroudView() {
+        if (mBackgroundView == null) {
             mBackgroundView = new ImageView(getContext());
             this.addView(mBackgroundView);
         }
     }
 
-    public RoundRectDrawableWithShadow getShadowDrawable(){
+    View mContentAnchorView;
+    int mOffsetAnchorX;
+    int mOffsetAnchorY;
+    int mHorizontalAnchorFlag;
+    int mVerticalAnchorFlag;
+    int[] auchorViewlocation;
+
+    public void setRelativePosition(View anchor, int horizontalFlag, int verticalFlag) {
+        setRelativePosition(anchor, horizontalFlag, verticalFlag, 0, 0);
+    }
+
+    public void setRelativePosition(View anchor, int horizontalFlag, int verticalFlag, int offsetX, int offsetY) {
+        this.mContentAnchorView = anchor;
+        this.mHorizontalAnchorFlag = horizontalFlag;
+        this.mVerticalAnchorFlag = verticalFlag;
+        this.mOffsetAnchorX = offsetX;
+        this.mOffsetAnchorY = offsetY;
+    }
+
+    public RoundRectDrawableWithShadow getShadowDrawable() {
         return shadowDrawable;
+    }
+
+    public void setCornerRadius(float radius){
+        this.radius = radius;
     }
 }

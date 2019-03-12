@@ -50,6 +50,10 @@ public class DialogFragmentDelegateImpl implements WindowDelegate {
         mParams.width = WindowManager.LayoutParams.MATCH_PARENT;
         mParams.height =activity.getResources().getDisplayMetrics().heightPixels;
         window.setAttributes(mParams);
+        if (dialog.getWindow() != null && dialog.getWindow().getDecorView() != null) {
+            dialog.getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+        }
         mDialogFragment.setDialog(dialog);
         AppCompatActivity appCompatActivity = (AppCompatActivity) activity;
         mManager = appCompatActivity.getSupportFragmentManager();

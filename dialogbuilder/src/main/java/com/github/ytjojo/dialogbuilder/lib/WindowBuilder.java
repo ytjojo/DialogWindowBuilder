@@ -1,6 +1,5 @@
 package com.github.ytjojo.dialogbuilder.lib;
 
-import android.animation.Animator;
 import android.app.Activity;
 import android.util.SparseArray;
 import android.view.Gravity;
@@ -30,20 +29,20 @@ public class WindowBuilder {
     private boolean canceledOnTouchOutside;
     private Activity activity;
     private WindowDelegate viewVector;
-    private AnimDelegate dialogDelegate;
+    private AnimDelegate mAnimatDelegate;
 
     public WindowBuilder(Activity activity) {
         this.activity = activity;
-        this.dialogDelegate = new AnimDelegate(activity, this);
+        this.mAnimatDelegate = new AnimDelegate(activity, this);
     }
 
     public WindowBuilder setContentView(@LayoutRes int layout) {
-        this.dialogDelegate.setContentView(LayoutInflater.from(activity).inflate(layout, dialogDelegate.getParentView(), false));
+        this.mAnimatDelegate.setContentView(LayoutInflater.from(activity).inflate(layout, mAnimatDelegate.getParentView(), false));
         return this;
     }
 
     public WindowBuilder setContentView(View view) {
-        this.dialogDelegate.setContentView(view);
+        this.mAnimatDelegate.setContentView(view);
         return this;
     }
 
@@ -63,12 +62,18 @@ public class WindowBuilder {
         return this;
     }
 
-    public void setRelativePosition(View anchor, int horizontalFlag, int verticalFlag) {
+    public WindowBuilder setRelativePosition(View anchor, int horizontalFlag, int verticalFlag) {
+        mAnimatDelegate.getParentView().setRelativePosition(anchor,horizontalFlag,verticalFlag);
+        return this;
+    }
 
+    public void setRelativePosition(View anchor, int horizontalFlag, int verticalFlag,int offsetX,int offsetY) {
+        mAnimatDelegate.getParentView().setRelativePosition(anchor,horizontalFlag,verticalFlag,offsetX,offsetY);
     }
 
     public WindowBuilder setWindowBackgroudColor(@ColorInt int color) {
-        dialogDelegate.getParentView().setWindowBackgroudColor(color);
+        mAnimatDelegate.getParentView().setBackground(null);
+        mAnimatDelegate.getParentView().setWindowBackgroudColor(color);
         return this;
     }
 
@@ -90,15 +95,19 @@ public class WindowBuilder {
         return this;
 
     }
+    public WindowBuilder setCornerRadus(float radus){
+        mAnimatDelegate.getParentView().setCornerRadius(radus);
+        return this;
+    }
 
     private boolean isCreateCalled;
 
     long time;
 
     public WindowBuilder create() {
-        viewVector.onCreate(activity, dialogDelegate.getParentView());
+        viewVector.onCreate(activity, mAnimatDelegate.getParentView());
 
-        dialogDelegate.addDismissAnimEndListener(new AnimDelegate.OnAnimEndListner() {
+        mAnimatDelegate.addDismissAnimEndListener(new AnimDelegate.OnAnimEndListner() {
             @Override
             public void onEnd() {
                 viewVector.detachFromWindow();
@@ -110,7 +119,7 @@ public class WindowBuilder {
             }
         });
 
-        dialogDelegate.getParentView().setOnClickListener(new View.OnClickListener() {
+        mAnimatDelegate.getParentView().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dismiss();
@@ -132,8 +141,8 @@ public class WindowBuilder {
     }
 
     public WindowBuilder setLeftRightMargin(int leftRightMarginpx) {
-        dialogDelegate.getParentView().setLeftMargin(leftRightMarginpx);
-        dialogDelegate.getParentView().setRightMargin(leftRightMarginpx);
+        mAnimatDelegate.getParentView().setLeftMargin(leftRightMarginpx);
+        mAnimatDelegate.getParentView().setRightMargin(leftRightMarginpx);
         return this;
     }
 
@@ -144,23 +153,26 @@ public class WindowBuilder {
     }
 
     public WindowBuilder setMinTopMargin(int minTopMarginpx) {
-        dialogDelegate.getParentView().setMinTopMargin(minTopMarginpx);
+        mAnimatDelegate.getParentView().setMinTopMargin(minTopMarginpx);
         return this;
     }
 
-    public WindowBuilder setLayoutVerticalBias(@FloatRange(from = 0f, to = 1f) float verticalBias) {
-        dialogDelegate.getParentView().setLayoutVerticalBias(verticalBias);
-        return this;
-    }
+
 
     public WindowBuilder setMinBottomMargin(int minBottomMargin) {
-        dialogDelegate.getParentView().setMinBottomMargin(minBottomMargin);
+        mAnimatDelegate.getParentView().setMinBottomMargin(minBottomMargin);
         return this;
     }
 
     public WindowBuilder setWidthMatchScreen() {
-        dialogDelegate.getParentView().setLeftMargin(0);
-        dialogDelegate.getParentView().setRightMargin(0);
+        mAnimatDelegate.getParentView().setLeftMargin(0);
+        mAnimatDelegate.getParentView().setRightMargin(0);
+        return this;
+    }
+
+
+    public WindowBuilder setLayoutVerticalBias(@FloatRange(from = 0f, to = 1f) float verticalBias) {
+        mAnimatDelegate.getParentView().setLayoutVerticalBias(verticalBias);
         return this;
     }
 
@@ -180,12 +192,12 @@ public class WindowBuilder {
         return viewVector;
     }
 
-    public AnimDelegate getDialogDelegate() {
-        return dialogDelegate;
+    public AnimDelegate getmAnimatDelegate() {
+        return mAnimatDelegate;
     }
 
     public View getContentView() {
-        return dialogDelegate.getParentView().getContentView();
+        return mAnimatDelegate.getParentView().getContentView();
     }
 
     public Activity getActivity() {
@@ -198,7 +210,7 @@ public class WindowBuilder {
         }
         if (!viewVector.isShowing()) {
             viewVector.attachToWindow();
-            dialogDelegate.startShowAnim();
+            mAnimatDelegate.startShowAnim();
         }
         return this;
 
@@ -206,7 +218,7 @@ public class WindowBuilder {
 
     public void dismiss() {
         if (viewVector.isShowing()) {
-            dialogDelegate.startDismissAnim();
+            mAnimatDelegate.startDismissAnim();
         }
 
     }
@@ -215,7 +227,7 @@ public class WindowBuilder {
     @SuppressWarnings("unchecked")
     public <E extends View> E findView(int id) {
         try {
-            return (E) dialogDelegate.getParentView().findViewById(id);
+            return (E) mAnimatDelegate.getParentView().findViewById(id);
         } catch (ClassCastException e) {
 
             throw e;

@@ -239,7 +239,7 @@ public class AnimDelegate {
         v.setPivotX(0.5f * v.getMeasuredWidth());
         v.setPivotY(0.5f * v.getMeasuredHeight());
         v.animate().scaleX(0.5f).scaleY(0.5f).setDuration(300).start();
-//        v.animate().alpha(0f).setDuration(200).start();
+        v.animate().alpha(0f).setDuration(200).start();
     }
     private void startBottomTranslationIn(Animator.AnimatorListener l){
 
