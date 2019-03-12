@@ -106,7 +106,7 @@ public class TipViewInfo {
         this.offsetTipViewY = offsetTipViewY;
         return this;
     }
-    public TipViewInfo setOffsetTipView(int offsetTipViewX,int offsetTipViewY) {
+    public TipViewInfo setTipViewOffset(int offsetTipViewX, int offsetTipViewY) {
         this.offsetTipViewX = offsetTipViewX;
         this.offsetTipViewY = offsetTipViewY;
         return this;
@@ -127,7 +127,7 @@ public class TipViewInfo {
         return tipView;
     }
 
-    public TipViewInfo setTipViewLayoutId(@LayoutRes int layoutId){
+    public TipViewInfo setTipView(@LayoutRes int layoutId){
         tipViewLayoutId = layoutId;
         return this;
 
@@ -149,7 +149,7 @@ public class TipViewInfo {
                     }
                     return true;
                 }
-                return false;
+                return true;
             }
         });
         return this;
@@ -168,13 +168,13 @@ public class TipViewInfo {
     public void updateLocation( int[] parentLocation) {
         if (locationInScreen == null) {
             locationInScreen = new int[2];
-            hightLightedView.getLocationOnScreen(locationInScreen);
         }
+        hightLightedView.getLocationOnScreen(locationInScreen);
         locationX = locationInScreen[0] - parentLocation[0];
         locationY = locationInScreen[1] - parentLocation[1];
 
-        drawingRect.set(locationX,locationY,locationX + hightLightedView.getWidth(),
-                locationY + hightLightedView.getHeight());
+        drawingRect.set(locationX,locationY,locationX + hightLightedView.getMeasuredWidth(),
+                locationY + hightLightedView.getMeasuredHeight());
 
         drawingRect.inset(insetDx,insetDy);
         getShape().setViewRect(drawingRect);

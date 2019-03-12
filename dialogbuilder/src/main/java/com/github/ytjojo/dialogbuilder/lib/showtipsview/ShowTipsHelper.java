@@ -4,8 +4,12 @@ import android.app.Activity;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.TextView;
+import android.widget.Toolbar;
 
 import com.github.ytjojo.dialogbuilder.lib.DecorViewDelegateImp;
+import com.github.ytjojo.dialogbuilder.lib.R;
 import com.github.ytjojo.dialogbuilder.lib.WindowBuilder;
 
 import java.util.ArrayList;
@@ -121,7 +125,6 @@ public class ShowTipsHelper {
                     && bottom == oldBottom) {
                 return;
             }
-            guideView.setCanLayout();
             guideView.reLayout();
 
         }

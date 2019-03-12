@@ -19,7 +19,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-public class ScrollingActivity extends AppCompatActivity{
+public class ScrollingActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +34,7 @@ public class ScrollingActivity extends AppCompatActivity{
                 builder = WindowBuilder.newBuilder(ScrollingActivity.this)
                         .setContentView(R.layout.dialog_content)
                         .windowDelegate(new DialogFragmentDelegateImpl())
-                        .setRelativePosition(v,WindowBuilder.RELATIVE_LEFT_TO_LEFTOF|WindowBuilder.RELATIVE_RIGHT_TO_LEFTOF,WindowBuilder.RELATIVE_BOTTOM_TO_TOPOF)
+                        .setRelativePosition(v, WindowBuilder.RELATIVE_LEFT_TO_LEFTOF | WindowBuilder.RELATIVE_RIGHT_TO_LEFTOF, WindowBuilder.RELATIVE_BOTTOM_TO_TOPOF)
                         .setWindowBackgroudColor(0x88000000)
                         .show();
             }
@@ -64,7 +64,7 @@ public class ScrollingActivity extends AppCompatActivity{
                 builder = WindowBuilder.newBuilder(ScrollingActivity.this)
                         .setContentView(R.layout.dialog_content)
                         .windowDelegate(new DialogFragmentDelegateImpl())
-                        .setRelativePosition(view,WindowBuilder.RELATIVE_RIGHT_TO_LEFTOF,WindowBuilder.RELATIVE_BOTTOM_TO_TOPOF)
+                        .setRelativePosition(view, WindowBuilder.RELATIVE_RIGHT_TO_LEFTOF, WindowBuilder.RELATIVE_BOTTOM_TO_TOPOF)
                         .setWindowBackgroudColor(0x88000000)
                         .show();
 
@@ -83,17 +83,23 @@ public class ScrollingActivity extends AppCompatActivity{
 
         ShowTipsHelper.create(ScrollingActivity.this)
                 .addTipViewInfo(TipViewInfo.create()
-                    .setHightLightedView(findViewById(R.id.fab))
-                        .setTipView(new TextView(ScrollingActivity.this))
-                        .setInset(-10,-10)
+                        .setHightLightedView(findViewById(R.id.fab))
+                        .setTipView(R.layout.layout_show_tips_1)
+                        .setHorizontalAnchorFlag(WindowBuilder.RELATIVE_RIGHT_TO_LEFTOF)
+                        .setVerticalAnchorFlag(WindowBuilder.RELATIVE_TOP_TO_BOTTOMOF)
+                        .setTipViewOffset(-10, 30)
+                        .setInset(-10, -10)
                         .setShape(new CircleShape(15))
 
 
                 ).addTipViewInfo(
                 TipViewInfo.create()
                         .setHightLightedView(findViewById(R.id.tv_click))
-                        .setTipView(new TextView(ScrollingActivity.this))
-                        .setInset(-10,-10)
+                        .setTipView(R.layout.layout_show_tips_1)
+                        .setHorizontalAnchorFlag(WindowBuilder.RELATIVE_LEFT_TO_RIGHTOF)
+                        .setVerticalAnchorFlag(WindowBuilder.RELATIVE_TOP_TO_BOTTOMOF)
+                        .setTipViewOffset(-20, 30)
+                        .setInset(-10, -10)
                         .setShape(new RectShape())
         )
                 .show();
@@ -146,12 +152,13 @@ public class ScrollingActivity extends AppCompatActivity{
                     .show();
 
 
-
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
+
     WindowBuilder builder;
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();

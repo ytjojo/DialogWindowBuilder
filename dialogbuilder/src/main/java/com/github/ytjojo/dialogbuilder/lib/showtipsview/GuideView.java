@@ -13,10 +13,10 @@ import android.widget.FrameLayout;
 import com.github.ytjojo.dialogbuilder.lib.WindowBuilder;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.view.ViewCompat;
 
 /**
  * Created by zhaozhibo on 2017/10/31.
@@ -83,7 +83,7 @@ public class GuideView extends FrameLayout implements View.OnClickListener {
         if (mTipViewInfos != null && !mTipViewInfos.isEmpty()) {
             for (TipViewInfo tipViewInfo : mTipViewInfos) {
 
-                if (tipViewInfo.getHightLightedView() == null
+                if (!ViewCompat.isAttachedToWindow(tipViewInfo.getTipView())
                         || tipViewInfo.getShape() == null
                         || tipViewInfo.getShape().getViewRect() == null
                         || tipViewInfo.getShape().getViewRect().isEmpty()) {
@@ -99,8 +99,7 @@ public class GuideView extends FrameLayout implements View.OnClickListener {
         //finally, draw the rects of all the highlighted views.
         if (mTipViewInfos != null && !mTipViewInfos.isEmpty()) {
             for (TipViewInfo tipViewInfo : mTipViewInfos) {
-
-                if (tipViewInfo.getShape() == null
+                if (!ViewCompat.isAttachedToWindow(tipViewInfo.getTipView())
                         || tipViewInfo.getShape().getViewRect() == null
                         || tipViewInfo.getShape().getViewRect().isEmpty()) {
                     continue;
@@ -128,14 +127,19 @@ public class GuideView extends FrameLayout implements View.OnClickListener {
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        if (canLayout) {
-            super.onLayout(changed, left, top, right, bottom);
+
+        super.onLayout(changed, left, top, right, bottom);
+        if (parentLocation == null) {
+            parentLocation = new int[2];
+            getLocationOnScreen(parentLocation);
+        }
+        if (ViewCompat.isLaidOut(getRootView())) {
             reLayout();
         }
 
     }
 
-    int[] parentLocation = new int[2];
+    int[] parentLocation;
 
     public void reLayout() {
         int childCount = getChildCount();
@@ -143,9 +147,7 @@ public class GuideView extends FrameLayout implements View.OnClickListener {
             View childView = getChildAt(i);
             for (TipViewInfo info : mTipViewInfos) {
                 if (childView == info.getTipView()) {
-                    getLocationOnScreen(parentLocation);
                     info.updateLocation(parentLocation);
-
                     int localX = info.getLocationX() + info.getOffsetTipViewX();
                     int localY = info.getLocationY() + info.getOffsetTipViewY();
                     int childLeft = 0;
@@ -159,19 +161,19 @@ public class GuideView extends FrameLayout implements View.OnClickListener {
                         childLeft = localX - childWidth / 2;
                     } else if ((mHorizontalAnchorFlag & WindowBuilder.RELATIVE_RIGHT_TO_RIGHTOF) != 0
                             && (mHorizontalAnchorFlag & WindowBuilder.RELATIVE_LEFT_TO_RIGHTOF) != 0) {
-                        childLeft = localX + childView.getMeasuredWidth() - childWidth / 2;
+                        childLeft = localX + info.getHightLightedView().getMeasuredWidth() - childWidth / 2;
                     } else if ((mHorizontalAnchorFlag & WindowBuilder.RELATIVE_LEFT_TO_LEFTOF) != 0
                             && (mHorizontalAnchorFlag & WindowBuilder.RELATIVE_RIGHT_TO_RIGHTOF) != 0) {
-                        childLeft = localX + (childView.getMeasuredWidth() - childWidth) / 2;
+                        childLeft = localX + (info.getHightLightedView().getMeasuredWidth() - childWidth) / 2;
                     } else if ((mHorizontalAnchorFlag & WindowBuilder.RELATIVE_LEFT_TO_LEFTOF) != 0) {
                         childLeft = localX;
                     } else if ((mHorizontalAnchorFlag & WindowBuilder.RELATIVE_RIGHT_TO_LEFTOF) != 0) {
                         childLeft = localX - childWidth;
                     } else if ((mHorizontalAnchorFlag & WindowBuilder.RELATIVE_RIGHT_TO_RIGHTOF) != 0) {
-                        childLeft = localX + childView.getMeasuredWidth() - childWidth;
+                        childLeft = localX + info.getHightLightedView().getMeasuredWidth() - childWidth;
 
                     } else if ((mHorizontalAnchorFlag & WindowBuilder.RELATIVE_LEFT_TO_RIGHTOF) != 0) {
-                        childLeft = localX + childView.getMeasuredWidth();
+                        childLeft = localX + info.getHightLightedView().getMeasuredWidth();
 
                     } else {
                         childLeft = localX;
@@ -182,23 +184,24 @@ public class GuideView extends FrameLayout implements View.OnClickListener {
                         childTop = localY - childHeight / 2;
                     } else if ((mVerticalAnchorFlag & WindowBuilder.RELATIVE_BOTTOM_TO_BOTTOMOF) != 0
                             && (mVerticalAnchorFlag & WindowBuilder.RELATIVE_TOP_TO_BOTTOMOF) != 0) {
-                        childTop = localY + childView.getMeasuredHeight() - childHeight / 2;
+                        childTop = localY + info.getHightLightedView().getMeasuredHeight() - childHeight / 2;
                     } else if ((mVerticalAnchorFlag & WindowBuilder.RELATIVE_TOP_TO_TOPOF) != 0
                             && (mVerticalAnchorFlag & WindowBuilder.RELATIVE_BOTTOM_TO_BOTTOMOF) != 0) {
-                        childTop = localY + (childView.getMeasuredHeight() - childHeight) / 2;
+                        childTop = localY + (info.getHightLightedView().getMeasuredHeight() - childHeight) / 2;
                     } else if ((mVerticalAnchorFlag & WindowBuilder.RELATIVE_TOP_TO_TOPOF) != 0) {
                         childTop = localY;
                     } else if ((mVerticalAnchorFlag & WindowBuilder.RELATIVE_BOTTOM_TO_TOPOF) != 0) {
                         childTop = localY - childHeight;
                     } else if ((mVerticalAnchorFlag & WindowBuilder.RELATIVE_BOTTOM_TO_BOTTOMOF) != 0) {
-                        childTop = localY + childView.getMeasuredHeight() - childHeight;
+                        childTop = localY + info.getHightLightedView().getMeasuredHeight() - childHeight;
 
                     } else if ((mVerticalAnchorFlag & WindowBuilder.RELATIVE_TOP_TO_BOTTOMOF) != 0) {
-                        childTop = localY + childView.getMeasuredHeight();
+                        childTop = localY + info.getHightLightedView().getMeasuredHeight();
 
                     } else {
                         childTop = localY;
                     }
+
                     childView.layout(childLeft, childTop, childLeft + childWidth, childTop + childHeight);
                 }
             }
@@ -215,17 +218,11 @@ public class GuideView extends FrameLayout implements View.OnClickListener {
         }
     }
 
-    boolean canLayout;
-
-    public void setCanLayout() {
-        canLayout = true;
-    }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         currentPos = 0;
-        canLayout = false;
     }
 
     public interface OnDismissListener {
