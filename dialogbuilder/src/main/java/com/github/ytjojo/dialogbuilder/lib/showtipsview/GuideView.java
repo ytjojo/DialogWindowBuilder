@@ -27,7 +27,7 @@ public class GuideView extends FrameLayout implements View.OnClickListener {
     public static final int DEFAULT_HIGHLIGHT_VIEW_BG_COLOR = 0xcc000000;
     private int maskColor = DEFAULT_HIGHLIGHT_VIEW_BG_COLOR;
     private boolean isAutoNext;
-    private List<TipViewInfo> mTipViewInfos;
+    private ArrayList<TipViewInfo> mTipViewInfos;
     private int currentPos;
 
     public GuideView(@NonNull Context context) {
@@ -64,7 +64,7 @@ public class GuideView extends FrameLayout implements View.OnClickListener {
     }
 
 
-    public void setTipViewInfos(List<TipViewInfo> mTipViewInfos) {
+    public void setTipViewInfos(ArrayList<TipViewInfo> mTipViewInfos) {
         this.mTipViewInfos = mTipViewInfos;
     }
 
@@ -128,8 +128,11 @@ public class GuideView extends FrameLayout implements View.OnClickListener {
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        super.onLayout(changed, left, top, right, bottom);
-        reLayout();
+        if (canLayout) {
+            super.onLayout(changed, left, top, right, bottom);
+            reLayout();
+        }
+
     }
 
     int[] parentLocation = new int[2];
@@ -212,16 +215,32 @@ public class GuideView extends FrameLayout implements View.OnClickListener {
         }
     }
 
+    boolean canLayout;
+
+    public void setCanLayout() {
+        canLayout = true;
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        currentPos = 0;
+        canLayout = false;
+    }
 
     public interface OnDismissListener {
         void onDismiss();
     }
-    public interface OnClickListener{
-        void onClick(int index,TipViewInfo info,ArrayList<TipViewInfo> allTipViewInfos);
-        void onShow(int index,TipViewInfo info,ArrayList<TipViewInfo> allTipViewInfos);
+
+    public interface OnClickListener {
+        void onClick(int index, TipViewInfo info, ArrayList<TipViewInfo> allTipViewInfos);
     }
 
+    OnClickListener onClickListener;
 
+    public void setOnClickListener(OnClickListener l) {
+        this.onClickListener = l;
+    }
 
     public void setOnDismissListener(OnDismissListener listener) {
         if (listeners == null) {
@@ -238,14 +257,21 @@ public class GuideView extends FrameLayout implements View.OnClickListener {
     }
 
     public void showHighLight() {
-        if (currentPos >= mTipViewInfos.size() - 1||getChildCount()>=mTipViewInfos.size()) {
+        if (currentPos >= mTipViewInfos.size() - 1 || getChildCount() >= mTipViewInfos.size()) {
             if (listeners != null) {
                 for (OnDismissListener l : listeners) {
                     l.onDismiss();
                 }
             }
+            if (onClickListener != null) {
+                onClickListener.onClick(currentPos, mTipViewInfos.get(currentPos), mTipViewInfos);
+            }
+
         } else {
             this.removeAllViews();
+            if (onClickListener != null) {
+                onClickListener.onClick(currentPos, mTipViewInfos.get(currentPos), mTipViewInfos);
+            }
             currentPos++;
             if (currentPos <= mTipViewInfos.size() - 1) {
                 mTipViewInfos.get(currentPos).addToParentView(this);

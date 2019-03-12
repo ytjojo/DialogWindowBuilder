@@ -3,7 +3,9 @@ package com.github.ytjojo.dialogbuilder.lib.showtipsview;
 import android.graphics.Rect;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 
+import androidx.annotation.LayoutRes;
 import androidx.core.view.ViewCompat;
 
 /**
@@ -43,6 +45,8 @@ public class TipViewInfo {
     private int[] locationInScreen;
 
     private Rect drawingRect = new Rect();
+
+    private int tipViewLayoutId;
 
 
     public int getLocationX() {
@@ -123,9 +127,41 @@ public class TipViewInfo {
         return tipView;
     }
 
+    public TipViewInfo setTipViewLayoutId(@LayoutRes int layoutId){
+        tipViewLayoutId = layoutId;
+        return this;
+
+    }
+    public int getTipViewLayoutId(){
+        return tipViewLayoutId;
+    }
+
     public TipViewInfo setTipView(View tipView) {
         this.tipView = tipView;
+
+        tipView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                if(!getDrawingRect().isEmpty() && tipView.getViewTreeObserver().isAlive()){
+                    tipView.getViewTreeObserver().removeOnPreDrawListener(this);
+                    if(onShowAnim != null){
+                        onShowAnim.onShowAnim(TipViewInfo.this);
+                    }
+                    return true;
+                }
+                return false;
+            }
+        });
         return this;
+    }
+
+    private OnShowAnim onShowAnim;
+    public TipViewInfo setOnSHowAnim(OnShowAnim onShowAnim){
+        this.onShowAnim = onShowAnim;
+        return this;
+    }
+    public interface OnShowAnim{
+        void onShowAnim(TipViewInfo tipViewInfo);
     }
 
 

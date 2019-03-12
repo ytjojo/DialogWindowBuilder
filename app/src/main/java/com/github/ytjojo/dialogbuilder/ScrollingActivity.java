@@ -1,28 +1,23 @@
 package com.github.ytjojo.dialogbuilder;
 
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.KeyEvent;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 
 import com.github.ytjojo.dialogbuilder.lib.DialogFragmentDelegateImpl;
 import com.github.ytjojo.dialogbuilder.lib.WindowBuilder;
 import com.github.ytjojo.dialogbuilder.lib.showtipsview.CircleShape;
-import com.github.ytjojo.dialogbuilder.lib.showtipsview.OvalShape;
 import com.github.ytjojo.dialogbuilder.lib.showtipsview.RectShape;
 import com.github.ytjojo.dialogbuilder.lib.showtipsview.ShowTipsHelper;
 import com.github.ytjojo.dialogbuilder.lib.showtipsview.TipViewInfo;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.constraintlayout.widget.ConstraintLayout;
 
 public class ScrollingActivity extends AppCompatActivity{
 

@@ -1,13 +1,9 @@
 package com.github.ytjojo.dialogbuilder.lib.showtipsview;
 
 import android.app.Activity;
-import android.content.Context;
 import android.graphics.Color;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
-import android.view.Window;
-import android.widget.FrameLayout;
 
 import com.github.ytjojo.dialogbuilder.lib.DecorViewDelegateImp;
 import com.github.ytjojo.dialogbuilder.lib.WindowBuilder;
@@ -30,15 +26,15 @@ public class ShowTipsHelper {
     WindowBuilder builder;
 
     View rootView;
+    LayoutInflater inflater;
 
     public ShowTipsHelper(Activity context) {
         this.guideView = new GuideView(context);
         rootView = context.getWindow().getDecorView();
+        inflater = LayoutInflater.from(context);
         rootView.addOnLayoutChangeListener(onLayoutChangeListener);
-//        FrameLayout frameLayout =new FrameLayout(context);
-//        frameLayout.addView(guideView);
 //
-//        ((ViewGroup)context.getWindow().findViewById(Window.ID_ANDROID_CONTENT)).addView(frameLayout);
+//        ((ViewGroup)context.getWindow().findViewById(Window.ID_ANDROID_CONTENT)).addView(guideView);
 
         builder = WindowBuilder.newBuilder(context)
                 .setContentView(guideView)
@@ -78,6 +74,7 @@ public class ShowTipsHelper {
     }
 
     public ShowTipsHelper showAll() {
+        inflateIfNecessary();
         if (tipViewInfos != null) {
             guideView.setTipViewInfos(tipViewInfos);
             for (TipViewInfo info : tipViewInfos) {
@@ -88,7 +85,21 @@ public class ShowTipsHelper {
         return this;
     }
 
+    private void inflateIfNecessary() {
+        if(tipViewInfos == null){
+            return;
+        }
+        for (TipViewInfo info : tipViewInfos) {
+            if (info.getTipView() == null && info.getTipViewLayoutId() > 0) {
+                View tipView = inflater.inflate(info.getTipViewLayoutId(), guideView, false);
+                info.setTipView(tipView);
+            }
+        }
+
+    }
+
     public ShowTipsHelper show() {
+        inflateIfNecessary();
         if (tipViewInfos != null && tipViewInfos.size() > 0) {
             guideView.setTipViewInfos(tipViewInfos);
             guideView.addView(tipViewInfos.get(0).getTipView());
@@ -110,6 +121,7 @@ public class ShowTipsHelper {
                     && bottom == oldBottom) {
                 return;
             }
+            guideView.setCanLayout();
             guideView.reLayout();
 
         }

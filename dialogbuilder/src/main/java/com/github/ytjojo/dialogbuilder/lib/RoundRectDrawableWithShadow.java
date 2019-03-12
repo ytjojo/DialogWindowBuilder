@@ -18,7 +18,6 @@ import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 
-
 import androidx.annotation.Nullable;
 
 

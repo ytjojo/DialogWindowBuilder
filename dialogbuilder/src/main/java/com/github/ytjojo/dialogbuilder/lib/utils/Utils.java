@@ -8,8 +8,6 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.PopupWindow;
 
-import com.github.ytjojo.dialogbuilder.lib.R;
-
 public class Utils {
 
 
