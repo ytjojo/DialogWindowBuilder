@@ -12,8 +12,6 @@ public interface WindowDelegate {
 
      void onCreate(Activity activity,View contentView);
 
-
-
      boolean isShowing();
 
      void setOnKeyListener(OnKeyListener l);

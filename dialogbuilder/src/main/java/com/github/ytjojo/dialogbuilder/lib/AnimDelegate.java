@@ -17,6 +17,7 @@ import android.widget.FrameLayout;
 import java.util.ArrayList;
 
 import androidx.annotation.CallSuper;
+import androidx.core.view.ViewCompat;
 import androidx.interpolator.view.animation.FastOutLinearInInterpolator;
 
 public class AnimDelegate {
@@ -83,7 +84,7 @@ public class AnimDelegate {
         mContentView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override
             public boolean onPreDraw() {
-                if (mContentView.getMeasuredHeight() > 0 && mContentView.getViewTreeObserver().isAlive()) {
+                if (ViewCompat.isLaidOut(mContentView.getRootView()) && mContentView.getMeasuredHeight() > 0 && mContentView.getViewTreeObserver().isAlive()) {
                     mContentView.getViewTreeObserver().removeOnPreDrawListener(this);
                     startShowAnimInternal();
                     return true;
@@ -151,7 +152,6 @@ public class AnimDelegate {
     }
 
 
-
     public void startDismissAnim() {
 
         Animator.AnimatorListener listener = new Animator.AnimatorListener() {
@@ -187,21 +187,23 @@ public class AnimDelegate {
 
     private void startDefaultShowAnim(Animator.AnimatorListener l) {
 
-        if(getParentView().getContentView().getBottom()==getParentView().getMeasuredHeight()){
+        if (getParentView().getContentView().getBottom() == getParentView().getMeasuredHeight()) {
 
             startBottomTranslationIn(l);
-        }else {
+        } else {
             zoomIn(l);
         }
     }
+
     private void startDefaultDismissAnim(Animator.AnimatorListener l) {
-        if(getParentView().getContentView().getBottom()==getParentView().getMeasuredHeight()){
+        if (getParentView().getContentView().getBottom() == getParentView().getMeasuredHeight()) {
             startBottomTranslationOut(l);
-        }else {
+        } else {
             zoomOut(l);
         }
     }
-    private void zoomIn(Animator.AnimatorListener l){
+
+    private void zoomIn(Animator.AnimatorListener l) {
         Animator showBackgroundAnim = getShowBackgroundAnim();
         showBackgroundAnim.addListener(l);
         showBackgroundAnim.start();
@@ -215,7 +217,8 @@ public class AnimDelegate {
         v.animate().alpha(1f).setDuration(250).start();
 
     }
-    private void zoomOut(Animator.AnimatorListener l){
+
+    private void zoomOut(Animator.AnimatorListener l) {
         ValueAnimator valueAnimator = ValueAnimator.ofInt(255, 0).setDuration(300);
         valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
 
@@ -241,7 +244,8 @@ public class AnimDelegate {
         v.animate().scaleX(0.5f).scaleY(0.5f).setDuration(300).start();
         v.animate().alpha(0f).setDuration(200).start();
     }
-    private void startBottomTranslationIn(Animator.AnimatorListener l){
+
+    private void startBottomTranslationIn(Animator.AnimatorListener l) {
 
         mParentView.getBackgroundView().setImageAlpha(0);
         ValueAnimator valueAnimator = ValueAnimator.ofInt(0, 255).setDuration(200);
@@ -266,7 +270,8 @@ public class AnimDelegate {
 
 
     }
-    private void startBottomTranslationOut(Animator.AnimatorListener l){
+
+    private void startBottomTranslationOut(Animator.AnimatorListener l) {
         ValueAnimator valueAnimator = ValueAnimator.ofInt(255, 0).setDuration(300);
         valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
 
