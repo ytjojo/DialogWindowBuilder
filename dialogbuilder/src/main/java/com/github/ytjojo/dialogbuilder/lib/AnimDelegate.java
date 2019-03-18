@@ -79,23 +79,40 @@ public class AnimDelegate {
         return isAnimRunning;
     }
 
+    boolean canStartShowAnim;
+
     final public void startShowAnim() {
+        canStartShowAnim = false;
         mParentView.getBackgroundView().setImageAlpha(0);
         mContentView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override
             public boolean onPreDraw() {
                 if (ViewCompat.isLaidOut(mContentView.getRootView()) && mContentView.getMeasuredHeight() > 0 && mContentView.getViewTreeObserver().isAlive()) {
-                    mContentView.getViewTreeObserver().removeOnPreDrawListener(this);
-                    startShowAnimInternal();
-                    return true;
+                    addOnLayoutChange();
+                    if (canStartShowAnim) {
+                        mContentView.getViewTreeObserver().removeOnPreDrawListener(this);
+                        startShowAnimInternal();
+                    }
+                    return canStartShowAnim;
                 }
 
-                return true;
+                return false;
             }
         });
 
-
     }
+
+    private void addOnLayoutChange() {
+        mContentView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                canStartShowAnim = true;
+                mContentView.removeOnLayoutChangeListener(this);
+            }
+
+        });
+    }
+
 
     private Animator getShowBackgroundAnim() {
         ValueAnimator valueAnimator = ValueAnimator.ofInt(0, 255).setDuration(250);
@@ -246,9 +263,10 @@ public class AnimDelegate {
     }
 
     private void startBottomTranslationIn(Animator.AnimatorListener l) {
-
+        int duration = (int) ((float)mContentView.getMeasuredHeight() /mParentView.getMeasuredHeight() *500);
+        duration = Math.max(duration,250);
         mParentView.getBackgroundView().setImageAlpha(0);
-        ValueAnimator valueAnimator = ValueAnimator.ofInt(0, 255).setDuration(200);
+        ValueAnimator valueAnimator = ValueAnimator.ofInt(0, 255).setDuration(duration -50);
         valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
 
 
@@ -265,14 +283,17 @@ public class AnimDelegate {
         v.setPivotX(0.5f * v.getMeasuredWidth());
         v.setPivotY(0.5f * v.getMeasuredHeight());
         v.setTranslationY(v.getMeasuredHeight());
-        v.animate().translationY(0).setDuration(250).setListener(l).start();
+        v.animate().translationY(0).setDuration(duration).setListener(l).start();
 //        v.animate().alpha(1f).setDuration(250).start();
 
 
     }
 
     private void startBottomTranslationOut(Animator.AnimatorListener l) {
-        ValueAnimator valueAnimator = ValueAnimator.ofInt(255, 0).setDuration(300);
+
+        int duration = (int) ((float)mContentView.getMeasuredHeight() /mParentView.getMeasuredHeight() *500);
+        duration = Math.max(duration,250);
+        ValueAnimator valueAnimator = ValueAnimator.ofInt(255, 0).setDuration(duration-100);
         valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
 
 
@@ -294,8 +315,7 @@ public class AnimDelegate {
         final View v = getParentView().getContentView();
         v.setPivotX(0.5f * v.getMeasuredWidth());
         v.setPivotY(0.5f * v.getMeasuredHeight());
-        v.animate().translationY(v.getMeasuredHeight()).setDuration(300).start();
-        v.animate().alpha(0f).setDuration(200).start();
+        v.animate().translationY(v.getMeasuredHeight()).setDuration(duration).start();
     }
 
     protected boolean onCreateShowAnim(Animator.AnimatorListener l) {
